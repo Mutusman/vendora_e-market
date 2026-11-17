@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lycon Stitches — Wallet</title>
+<style>
+:root{
+  --gold:#C9A227; --black:#111; --grey:#f2f1ec; --line:#e4e1da; --white:#fff; --green:#2a9d5c; --red:#b3492f;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  background:var(--grey); color:var(--black);
+  font-family:'Segoe UI',system-ui,sans-serif;
+  display:flex; justify-content:center;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --grey:#141312; --black:#f2f0ea; --white:#1f1e1b; --line:#333029; }
+}
+:root[data-theme="dark"]{ --grey:#141312; --black:#f2f0ea; --white:#1f1e1b; --line:#333029; }
+
+.app{width:100%; max-width:420px; min-height:100%; display:flex; flex-direction:column; padding-bottom:70px}
+
+.topbar{display:flex; justify-content:space-between; align-items:center; padding:16px 18px 4px}
+.hello{font-size:13px; color:#8a8578}
+.hello b{color:var(--black)}
+.mark{font-family:Georgia,serif; font-size:15px; letter-spacing:.04em; display:flex; align-items:center; gap:6px}
+
+.balance{
+  margin:14px 16px 0; background:linear-gradient(135deg,#181818,#2b2b28); color:#f4efe3;
+  border-radius:18px; padding:22px 20px; box-shadow:0 8px 22px rgba(0,0,0,.16);
+}
+.balance .top{display:flex; justify-content:space-between; align-items:center}
+.balance .label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.7}
+.eye{background:none; border:none; color:#f4efe3; opacity:.7; font-size:14px; cursor:pointer; padding:4px}
+.balance .amt{font-size:34px; font-weight:600; margin-top:6px; font-variant-numeric:tabular-nums}
+.balance .amt span{color:var(--gold)}
+.balance .actions{display:flex; gap:10px; margin-top:16px}
+.balance .actions button{
+  flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; cursor:pointer; font-weight:600;
+}
+.btn-topup{background:var(--gold); color:#111}
+.btn-history{background:rgba(255,255,255,.1); color:#f4efe3}
+
+.quick{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:18px 16px 4px}
+.qbtn{
+  background:var(--white); border:1px solid var(--line); border-radius:14px; padding:12px 4px;
+  display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;
+}
+.qbtn .ic{width:34px; height:34px; border-radius:50%; background:var(--grey); display:flex; align-items:center; justify-content:center; font-size:16px}
+.qbtn span{font-size:10.5px; color:var(--black); text-align:center}
+
+.panel{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px; margin:14px 16px 0}
+.panel h3{margin:0 0 10px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#8a8578}
+.inputrow{display:flex; gap:8px}
+input[type=number], input[type=text]{
+  flex:1; padding:11px 12px; border:1px solid var(--line); border-radius:10px;
+  background:var(--grey); color:var(--black); font-size:15px;
+}
+button.primary{background:var(--black); color:var(--grey); border:none; border-radius:10px; padding:11px 16px; font-size:13px; cursor:pointer}
+button.primary:disabled{opacity:.4}
+.err{color:var(--red); font-size:12px; margin-top:6px; min-height:14px}
+.field{margin-bottom:8px}
+
+.txn{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px}
+.txn:last-child{border-bottom:none}
+.txn .left{display:flex; gap:10px; align-items:center}
+.txn .ic{width:30px; height:30px; border-radius:50%; background:var(--grey); display:flex; align-items:center; justify-content:center; font-size:13px}
+.txn .meta{color:#8a8578; font-size:11px; margin-top:1px}
+.amt.in{color:var(--green)} .amt.out{color:var(--red)}
+.empty{color:#8a8578; font-size:13px; text-align:center; padding:14px 0}
+.ghost{width:100%; margin-top:10px; background:transparent; border:1px dashed var(--line); border-radius:10px; padding:9px; color:var(--black); font-size:12px; cursor:pointer}
+
+.nav{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px;
+  background:var(--white); border-top:1px solid var(--line); display:flex;
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+}
+.nav button{flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px; color:#8a8578; font-size:10px; cursor:pointer}
+.nav button.active{color:var(--gold)}
+
+.hidden{display:none}
+.sheet{margin:14px 16px 0}
+.note{font-size:11px; color:#8a8578; text-align:center; padding:14px 20px 4px; line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="hello">Welcome back,<br><b>Customer</b></div>
+    <div class="mark">🪡 Lycon Stitches</div>
+  </div>
+
+  <div class="balance">
+    <div class="top">
+      <div class="label">Wallet balance</div>
+      <button class="eye" id="eyeBtn">Hide</button>
+    </div>
+    <div class="amt">$<span id="balanceVal">0.00</span></div>
+    <div class="actions">
+      <button class="btn-topup" id="gotoTopup">+ Top Up</button>
+      <button class="btn-history" id="gotoHistory">History</button>
+    </div>
+  </div>
+
+  <div class="quick">
+    <div class="qbtn" data-panel="topupPanel"><div class="ic">💳</div><span>Top Up</span></div>
+    <div class="qbtn" data-panel="payPanel"><div class="ic">🧵</div><span>Pay Order</span></div>
+    <div class="qbtn" data-panel="sendPanel"><div class="ic">↗️</div><span>Send</span></div>
+    <div class="qbtn" data-panel="bankPanel"><div class="ic">🏦</div><span>To Bank</span></div>
+  </div>
+
+  <div class="panel sheet" id="topupPanel">
+    <h3>Top up wallet</h3>
+    <div class="field inputrow">
+      <input type="number" id="topupInput" placeholder="Amount ($)" min="1" step="1">
+      <button class="primary" id="topupBtn">Add</button>
+    </div>
+    <div class="err" id="topupErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="payPanel">
+    <h3>Pay for an order</h3>
+    <div class="field inputrow">
+      <input type="number" id="payInput" placeholder="Order amount ($)" min="1" step="1">
+      <button class="primary" id="payBtn">Pay</button>
+    </div>
+    <div class="err" id="payErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="sendPanel">
+    <h3>Send to another wallet</h3>
+    <div class="field"><input type="text" id="sendTo" placeholder="Recipient name or phone"></div>
+    <div class="field inputrow">
+      <input type="number" id="sendInput" placeholder="Amount ($)" min="1" step="1">
+      <button class="primary" id="sendBtn">Send</button>
+    </div>
+    <div class="err" id="sendErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="bankPanel">
+    <h3>Transfer to bank account</h3>
+    <div class="field"><input type="text" id="bankAcct" placeholder="Bank account number"></div>
+    <div class="field inputrow">
+      <input type="number" id="bankInput" placeholder="Amount ($)" min="1" step="1">
+      <button class="primary" id="bankBtn">Transfer</button>
+    </div>
+    <div class="err" id="bankErr"></div>
+  </div>
+
+  <div class="panel" id="historyPanel">
+    <h3>Transaction history</h3>
+    <div id="txnList"><div class="empty">No transactions yet</div></div>
+    <button class="ghost" id="resetBtn">Reset demo wallet</button>
+  </div>
+
+  <div class="note">Demo wallet — balance is stored in this browser only.<br>Ready to connect to real accounts, checkout &amp; payouts.</div>
+
+  <div class="nav">
+    <button class="active" data-panel="">🏠<span>Home</span></button>
+    <button data-panel="topupPanel">💳<span>Top Up</span></button>
+    <button data-panel="payPanel">🧵<span>Pay</span></button>
+    <button data-panel="historyPanel">📜<span>History</span></button>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = 'lycon_wallet_v2';
+let state = { balance: 0, txns: [], hidden: false };
+
+function load(){
+  try{ const raw = localStorage.getItem(STORE_KEY); if(raw) state = JSON.parse(raw); }catch(e){}
+}
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+function fmt(n){ return n.toFixed(2); }
+
+function render(){
+  document.getElementById('balanceVal').textContent = state.hidden ? '••••' : fmt(state.balance);
+  document.getElementById('eyeBtn').textContent = state.hidden ? 'Show' : 'Hide';
+  const list = document.getElementById('txnList');
+  if(!state.txns.length){ list.innerHTML = '<div class="empty">No transactions yet</div>'; return; }
+  const icons = {topup:'💳', pay:'🧵', send:'↗️', bank:'🏦'};
+  const labels = {topup:'Top up', pay:'Order payment', send:'Sent', bank:'Bank transfer'};
+  list.innerHTML = state.txns.slice().reverse().map(t=>{
+    const isIn = t.type === 'topup';
+    return `<div class="txn">
+      <div class="left">
+        <div class="ic">${icons[t.type]||'💠'}</div>
+        <div>
+          <div>${labels[t.type]||t.type}${t.who ? ' · '+t.who : ''}</div>
+          <div class="meta">${t.date}</div>
+        </div>
+      </div>
+      <div class="amt ${isIn?'in':'out'}">${isIn?'+':'-'}$${fmt(t.amount)}</div>
+    </div>`;
+  }).join('');
+}
+
+function addTxn(type, amount, who){
+  state.txns.push({ type, amount, who: who||'', date: new Date().toLocaleString() });
+}
+
+function showPanel(id){
+  document.querySelectorAll('.sheet, #historyPanel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('historyPanel').classList.remove('hidden');
+  if(id) document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.panel===(id||'')));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('eyeBtn').addEventListener('click', ()=>{ state.hidden=!state.hidden; save(); render(); });
+document.querySelectorAll('.qbtn').forEach(b=>b.addEventListener('click', ()=>showPanel(b.dataset.panel)));
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click', ()=>showPanel(b.dataset.panel)));
+document.getElementById('gotoTopup').addEventListener('click', ()=>showPanel('topupPanel'));
+document.getElementById('gotoHistory').addEventListener('click', ()=>showPanel('historyPanel'));
+
+function doTopup(){
+  const err=document.getElementById('topupErr'); err.textContent='';
+  const v=parseFloat(document.getElementById('topupInput').value);
+  if(!v||v<=0){ err.textContent='Enter a valid amount.'; return; }
+  state.balance+=v; addTxn('topup', v); save(); render();
+  document.getElementById('topupInput').value='';
+}
+function doPay(){
+  const err=document.getElementById('payErr'); err.textContent='';
+  const v=parseFloat(document.getElementById('payInput').value);
+  if(!v||v<=0){ err.textContent='Enter a valid amount.'; return; }
+  if(v>state.balance){ err.textContent='Insufficient balance.'; return; }
+  state.balance-=v; addTxn('pay', v); save(); render();
+  document.getElementById('payInput').value='';
+}
+function doSend(){
+  const err=document.getElementById('sendErr'); err.textContent='';
+  const to=document.getElementById('sendTo').value.trim();
+  const v=parseFloat(document.getElementById('sendInput').value);
+  if(!to){ err.textContent='Enter a recipient.'; return; }
+  if(!v||v<=0){ err.textContent='Enter a valid amount.'; return; }
+  if(v>state.balance){ err.textContent='Insufficient balance.'; return; }
+  state.balance-=v; addTxn('send', v, to); save(); render();
+  document.getElementById('sendTo').value=''; document.getElementById('sendInput').value='';
+}
+function doBank(){
+  const err=document.getElementById('bankErr'); err.textContent='';
+  const acct=document.getElementById('bankAcct').value.trim();
+  const v=parseFloat(document.getElementById('bankInput').value);
+  if(!acct){ err.textContent='Enter an account number.'; return; }
+  if(!v||v<=0){ err.textContent='Enter a valid amount.'; return; }
+  if(v>state.balance){ err.textContent='Insufficient balance.'; return; }
+  state.balance-=v; addTxn('bank', v, acct); save(); render();
+  document.getElementById('bankAcct').value=''; document.getElementById('bankInput').value='';
+}
+
+document.getElementById('topupBtn').addEventListener('click', doTopup);
+document.getElementById('payBtn').addEventListener('click', doPay);
+document.getElementById('sendBtn').addEventListener('click', doSend);
+document.getElementById('bankBtn').addEventListener('click', doBank);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ state={balance:0,txns:[],hidden:false}; save(); render(); });
+
+load(); render(); showPanel('');
+</script>
+</body>
+</html>

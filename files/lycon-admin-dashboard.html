@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LYCON Admin</title>
+<style>
+:root{--gold:#D4AF37;--black:#000;--grey:#f4f3f1;--line:#e6e3db;--white:#fff;--green:#2a9d5c;--red:#c0392b;--amber:#8a6d00;
+box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:inherit} html,body{height:100%;margin:0}
+body{background:var(--grey); color:var(--black); font-family:'Segoe UI',system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--grey:#0b0b0b;--black:#f4f3f1;--white:#161616;--line:#2a2a2a;}}
+:root[data-theme="dark"]{--grey:#0b0b0b;--black:#f4f3f1;--white:#161616;--line:#2a2a2a;}
+.wrap{display:flex; min-height:100vh}
+.side{width:190px; background:var(--black); color:#fff; padding:20px 0; flex-shrink:0; overflow-y:auto}
+.side .mark{font-family:Georgia,serif; padding:0 18px 14px; font-size:15px; border-bottom:1px solid #222}
+.side .mark b{color:var(--gold)}
+.side .role{padding:10px 18px; font-size:11px; color:#999}
+.side nav{display:flex; flex-direction:column}
+.side nav button{background:none; border:none; color:#ccc; text-align:left; padding:9px 18px; font-size:12.5px; cursor:pointer}
+.side nav button.active{color:var(--gold); background:#161616; border-left:3px solid var(--gold)}
+.main{flex:1; padding:20px 22px; max-width:900px}
+.badge{background:#fff3cd; color:#7a5b00; font-size:11px; padding:6px 10px; border-radius:8px; display:inline-block; margin-bottom:14px}
+h1{font-size:19px; margin:0 0 16px}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px}
+.card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:14px}
+.card .lbl{font-size:11px; color:#8a8578; text-transform:uppercase}
+.card .val{font-size:20px; font-weight:600; margin-top:4px}
+.panel{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px}
+.panel h3{margin:0 0 12px; font-size:13px; text-transform:uppercase; color:#8a8578}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line)}
+th{color:#8a8578; font-weight:500; font-size:11px; text-transform:uppercase}
+.status{font-size:10px; padding:2px 8px; border-radius:20px}
+.status.ok{background:#e6f4ea; color:var(--green)}
+.status.pend{background:#fff3cd; color:var(--amber)}
+.status.fail{background:#fbe4e0; color:var(--red)}
+.section{display:none} .section.active{display:block}
+select{padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--grey); color:var(--black); font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div class="mark">LYCON <b>Admin</b></div>
+    <div class="role">Role: <select id="roleSel">
+      <option>Super Admin</option><option>Operations</option><option>Compliance</option><option>Customer Support</option><option>Finance</option>
+    </select></div>
+    <nav>
+      <button class="active" data-s="dashboard">📊 Dashboard</button>
+      <button data-s="users">👥 Users</button>
+      <button data-s="kyc">🪪 KYC</button>
+      <button data-s="transactions">📜 Transactions</button>
+      <button data-s="wallets">💰 Wallets</button>
+      <button data-s="merchants">🏪 Merchants</button>
+      <button data-s="disputes">⚠️ Disputes</button>
+      <button data-s="fraud">🚨 Fraud alerts</button>
+      <button data-s="reports">📈 Reports</button>
+      <button data-s="settings">⚙️ System settings</button>
+      <button data-s="audit">🗂️ Audit logs</button>
+    </nav>
+  </div>
+  <div class="main">
+    <div class="badge">SANDBOX MODE — demo data · access is role-restricted in production</div>
+
+    <div class="section active" id="dashboard">
+      <h1>Platform overview</h1>
+      <div class="cards">
+        <div class="card"><div class="lbl">Total users</div><div class="val">0</div></div>
+        <div class="card"><div class="lbl">Total wallet volume</div><div class="val">₦0.00</div></div>
+        <div class="card"><div class="lbl">Pending KYC</div><div class="val">0</div></div>
+        <div class="card"><div class="lbl">Open disputes</div><div class="val">0</div></div>
+      </div>
+      <div class="panel"><h3>System status</h3><table>
+        <tr><td>Payment provider</td><td><span class="status ok">Sandbox connected</span></td></tr>
+        <tr><td>BVN/NIN verification</td><td><span class="status pend">Not connected</span></td></tr>
+        <tr><td>Fraud monitoring</td><td><span class="status pend">Placeholder only</span></td></tr>
+      </table></div>
+    </div>
+
+    <div class="section" id="users"><h1>Users</h1><div class="panel"><h3>User directory</h3><table><tr><td style="color:#8a8578">No users yet.</td></tr></table></div></div>
+    <div class="section" id="kyc"><h1>KYC review</h1><div class="panel"><h3>Verification queue</h3><table><thead><tr><th>User</th><th>BVN</th><th>NIN</th><th>Status</th></tr></thead><tbody><tr><td colspan="4" style="color:#8a8578">No KYC submissions yet.</td></tr></tbody></table></div></div>
+    <div class="section" id="transactions"><h1>Transactions</h1><div class="panel"><h3>All transactions</h3><table><tr><td style="color:#8a8578">No transactions yet.</td></tr></table></div></div>
+    <div class="section" id="wallets"><h1>Wallets</h1><div class="panel"><h3>Wallet balances</h3><table><tr><td style="color:#8a8578">No wallets yet.</td></tr></table></div></div>
+    <div class="section" id="merchants"><h1>Merchants</h1><div class="panel"><h3>Registered merchants</h3><table><tr><td style="color:#8a8578">No merchants yet.</td></tr></table></div></div>
+    <div class="section" id="disputes"><h1>Disputes</h1><div class="panel"><h3>Open disputes</h3><table><tr><td style="color:#8a8578">No disputes yet.</td></tr></table></div></div>
+    <div class="section" id="fraud"><h1>Fraud alerts</h1><div class="panel"><h3>Flagged activity</h3><table><tr><td style="color:#8a8578">No alerts yet.</td></tr></table></div></div>
+    <div class="section" id="reports"><h1>Reports</h1><div class="panel"><h3>Platform reports</h3><table><tr><td>Daily transaction volume</td></tr><tr><td>KYC completion rate</td></tr><tr><td>Fraud incident summary</td></tr></table></div></div>
+    <div class="section" id="settings"><h1>System settings</h1><div class="panel"><h3>Configuration</h3><table>
+      <tr><td>Environment</td><td><span class="status pend">Sandbox</span></td></tr>
+      <tr><td>Transaction limits</td><td>Not configured</td></tr>
+      <tr><td>Payment provider adapter</td><td>Mock provider</td></tr>
+    </table></div></div>
+    <div class="section" id="audit"><h1>Audit logs</h1><div class="panel"><h3>Recent admin actions</h3><table><tr><td style="color:#8a8578">No actions logged yet.</td></tr></table></div></div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.side nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.side nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.s).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

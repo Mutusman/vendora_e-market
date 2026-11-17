@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VENDORA – Everything You Need, One Destination.</title>
+<style>
+:root{--bg:#fff;--fg:#111;--card:#f6f6f6;--line:#e4e4e4;--mut:#666;--or:#f97316;--hd:#000;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111;--fg:#f4f4f4;--card:#1c1c1c;--line:#333;--mut:#aaa}}
+:root[data-theme="dark"]{--bg:#111;--fg:#f4f4f4;--card:#1c1c1c;--line:#333;--mut:#aaa}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:var(--hd);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.bar{max-width:1100px;margin:auto;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.14em;font-size:22px;background:none;border:0;color:#fff;cursor:pointer;padding:0}.logo b{color:var(--or)}
+.nav{margin-left:auto;display:flex;gap:6px}
+.nb{background:none;border:1px solid #444;color:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:14px}
+.nb.on,.nb:hover{border-color:var(--or)}
+.srch{flex:1 1 100%;order:3}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.srch input{background:#fff;color:#000;border:0}
+main{max-width:1100px;margin:auto;padding:14px}
+.hero{background:#000;color:#fff;border-radius:16px;padding:22px 18px;margin-bottom:14px;border-left:6px solid var(--or)}
+.hero h1{margin:0 0 4px;font-size:24px}.hero p{margin:0;color:#ccc}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px}
+.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:8px 14px;cursor:pointer}
+.chip.on{background:var(--or);border-color:var(--or);color:#000;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+.pc{background:var(--card);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.img{height:110px;display:grid;place-items:center;font-size:52px;background:linear-gradient(135deg,#222,#444)}
+.pb{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.pn{font-weight:600;font-size:14px}.pcat{font-size:12px;color:var(--mut)}.pr{font-weight:800;color:var(--or);margin-top:auto}
+.btn{background:var(--or);color:#000;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+.btn.dk{background:#000;color:#fff}.btn.ol{background:none;border:1px solid var(--line);color:var(--fg)}
+.btn:disabled{opacity:.5}
+.panel{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}.row .t{flex:1}
+.q{display:flex;align-items:center;gap:8px}.q button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:18px}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
+.err{color:#e11d48;font-size:13px;margin-top:3px}
+.demo{background:#fff4e8;color:#7c2d12;border:1px solid var(--or);border-radius:10px;padding:10px;font-size:13px;margin-bottom:12px}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:18px;padding-top:10px}
+.badge{background:var(--or);color:#000;border-radius:10px;padding:0 6px;font-size:12px;font-weight:800;margin-left:4px}
+h2{margin:6px 0 10px}.mut{color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 14px 30px}
+</style></head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useMemo} = React;
+const CATS=["Fashion","Gadgets & Electronics","Kitchen Products","Furniture","Beauty & Personal Care","Home Essentials","Other Products"];
+const naira=n=>"₦"+Number(n).toLocaleString("en-NG");
+const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+let ADMIN_PW="";
+const api=async(m,u,b,admin)=>{const r=await fetch(u,{method:m,headers:{"Content-Type":"application/json",...(admin?{"X-Admin-Password":ADMIN_PW}:{})},body:b?JSON.stringify(b):undefined});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Request failed");return d};
+function Field({label,value,onChange,error,type="text",area,children}){
+  return <div><label>{label}</label>
+  {children||(area?<textarea rows="3" value={value} onChange={e=>onChange(e.target.value)}/>:<input type={type} value={value} onChange={e=>onChange(e.target.value)}/>)}
+  {error&&<div className="err">{error}</div>}</div>;
+}
+function ProductCard({p,onAdd}){
+  return <div className="pc"><div className="img">{p.emoji}</div>
+  <div className="pb"><div className="pcat">{p.cat}</div><div className="pn">{p.name}</div><div className="pr">{naira(p.price)}</div>
+  <button className="btn" onClick={()=>onAdd(p.id)}>Add to Cart</button></div></div>;
+}
+function Home({products,onAdd}){
+  const [q,setQ]=useState("");const [cat,setCat]=useState("All");
+  const list=useMemo(()=>products.filter(p=>(cat==="All"||p.cat===cat)&&p.name.toLowerCase().includes(q.trim().toLowerCase())),[products,q,cat]);
+  return <>
+    <div className="hero"><h1>Everything You Need, One Destination.</h1><p>Shop fashion, gadgets, kitchen, furniture and more.</p></div>
+    <input aria-label="Search products" placeholder="Search products by name…" value={q} onChange={e=>setQ(e.target.value)} style={{marginBottom:10}}/>
+    <div className="cats">{["All",...CATS].map(c=><button key={c} className={"chip"+(cat===c?" on":"")} onClick={()=>setCat(c)}>{c}</button>)}</div>
+    <h2>{q||cat!=="All"?"Results":"Featured Products"} <span className="mut" style={{fontSize:14}}>({list.length})</span></h2>
+    {list.length?<div className="grid">{list.map(p=><ProductCard key={p.id} p={p} onAdd={onAdd}/>)}</div>:<div className="panel mut">No products match. Try another search or category.</div>}
+  </>;
+}
+function Cart({items,setQty,go,subtotal}){
+  if(!items.length)return <div className="panel"><h2>Your cart</h2><p className="mut">Your cart is empty.</p><button className="btn" onClick={()=>go("home")}>Start shopping</button></div>;
+  return <div className="panel"><h2>Your cart</h2>
+    {items.map(({p,qty})=><div className="row" key={p.id}><span style={{fontSize:30}}>{p.emoji}</span>
+      <div className="t"><div className="pn">{p.name}</div><div className="mut">{naira(p.price)} each</div></div>
+      <div className="q"><button aria-label="Decrease" onClick={()=>setQty(p.id,qty-1)}>−</button><b>{qty}</b><button aria-label="Increase" onClick={()=>setQty(p.id,qty+1)}>+</button></div>
+      <button className="btn ol" onClick={()=>setQty(p.id,0)}>Remove</button></div>)}
+    <div className="tot"><span>Subtotal</span><span>{naira(subtotal)}</span></div>
+    <p className="mut" style={{fontSize:13}}>Delivery fees are not calculated in this demo.</p>
+    <button className="btn" style={{width:"100%"}} onClick={()=>go("checkout")}>Proceed to Checkout</button></div>;
+}
+function Checkout({items,subtotal,onPlace,go}){
+  const [f,setF]=useState({name:"",phone:"",address:"",notes:""});const [e,setE]=useState({});const [busy,setBusy]=useState(false);
+  const set=k=>v=>setF({...f,[k]:v});
+  if(!items.length)return <div className="panel">Your cart is empty. <button className="btn" onClick={()=>go("home")}>Shop</button></div>;
+  const submit=()=>{const er={};
+    if(f.name.trim().length<2)er.name="Enter your full name.";
+    if(!/^(\+234|0)[789][01]\d{8}$/.test(f.phone.replace(/\s/g,"")))er.phone="Enter a valid Nigerian number, e.g. 08012345678.";
+    if(f.address.trim().length<8)er.address="Enter your full delivery address.";
+    setE(er);if(!Object.keys(er).length){setBusy(true);onPlace(f).catch(x=>{setE({form:x.message});setBusy(false)})}};
+  return <><div className="demo"><b>Test checkout.</b> Your order is saved in this shop’s database, but no payment is taken. Do not enter card details.</div>
+    <div className="panel"><h2>Delivery details</h2>
+      <Field label="Full name *" value={f.name} onChange={set("name")} error={e.name}/>
+      <Field label="Phone number *" type="tel" value={f.phone} onChange={set("phone")} error={e.phone}/>
+      <Field label="Delivery address *" area value={f.address} onChange={set("address")} error={e.address}/>
+      <Field label="Order notes (optional)" area value={f.notes} onChange={set("notes")}/></div>
+    <div className="panel"><h2>Order summary</h2>
+      {items.map(({p,qty})=><div className="row" key={p.id}><div className="t">{qty} × {p.name}</div><b>{naira(p.price*qty)}</b></div>)}
+      <div className="tot"><span>Subtotal</span><span>{naira(subtotal)}</span></div></div>
+    {e.form&&<div className="err" style={{marginBottom:8}}>{e.form}</div>}<button className="btn" disabled={busy} style={{width:"100%"}} onClick={submit}>{busy?"Placing order…":"Place Order (no payment)"}</button></>;
+}
+function Confirmation({o,go}){
+  return <div className="panel"><h2>✅ Order received (no payment taken)</h2>
+    <div className="demo">Your order was saved under the reference below. No payment was processed, and sellers are not notified automatically.</div>
+    <p>Reference: <b>{o.ref}</b></p><p>Name: {o.f.name}<br/>Phone: {o.f.phone}<br/>Address: {o.f.address}{o.f.notes&&<><br/>Notes: {o.f.notes}</>}</p>
+    {o.items.map(({p,qty})=><div className="row" key={p.id}><div className="t">{qty} × {p.name}</div><b>{naira(p.price*qty)}</b></div>)}
+    <div className="tot"><span>Subtotal</span><span>{naira(o.subtotal)}</span></div>
+    <button className="btn" style={{marginTop:12}} onClick={()=>go("home")}>Continue shopping</button></div>;
+}
+function Seller(){
+  const [f,setF]=useState({name:"",biz:"",phone:"",email:"",cat:CATS[0]});const [e,setE]=useState({});const [done,setDone]=useState(false);
+  const set=k=>v=>setF({...f,[k]:v});
+  const submit=()=>{const er={};
+    if(f.name.trim().length<2)er.name="Required.";if(f.biz.trim().length<2)er.biz="Required.";
+    if(!/^(\+234|0)[789][01]\d{8}$/.test(f.phone.replace(/\s/g,"")))er.phone="Enter a valid Nigerian number.";
+    if(!/^\S+@\S+\.\S+$/.test(f.email))er.email="Enter a valid email.";
+    setE(er);if(!Object.keys(er).length)api("POST","/api/sellers",f).then(()=>setDone(true)).catch(x=>setE({form:x.message}))};
+  if(done)return <div className="panel"><h2>Application received</h2><div className="demo">Your details were saved for review. No seller account has been created.</div><button className="btn" onClick={()=>{setDone(false);setF({name:"",biz:"",phone:"",email:"",cat:CATS[0]})}}>Fill another</button></div>;
+  return <><div className="demo"><b>Application only.</b> Your details are saved for review. Submitting does not create a seller account or list products.</div>
+    <div className="panel"><h2>Become a Seller</h2>
+      <Field label="Seller name *" value={f.name} onChange={set("name")} error={e.name}/>
+      <Field label="Business name *" value={f.biz} onChange={set("biz")} error={e.biz}/>
+      <Field label="Phone number *" type="tel" value={f.phone} onChange={set("phone")} error={e.phone}/>
+      <Field label="Email *" type="email" value={f.email} onChange={set("email")} error={e.email}/>
+      <Field label="Product category"><select value={f.cat} onChange={ev=>set("cat")(ev.target.value)}>{CATS.map(c=><option key={c}>{c}</option>)}</select></Field>
+      {e.form&&<div className="err">{e.form}</div>}<button className="btn" style={{marginTop:14,width:"100%"}} onClick={submit}>Submit Application</button></div></>;
+}
+function Admin({products,refresh}){
+  const blank={name:"",price:"",cat:CATS[0],emoji:"📦"};
+  const [pw,setPw]=useState("");const [ok,setOk]=useState(false);const [f,setF]=useState(blank);const [edit,setEdit]=useState(null);
+  const [err,setErr]=useState("");const [orders,setOrders]=useState([]);const [sellers,setSellers]=useState([]);
+  const loadAll=()=>Promise.all([api("GET","/api/orders",null,true),api("GET","/api/sellers",null,true)]).then(([o,s])=>{setOrders(o);setSellers(s)});
+  const unlock=()=>{ADMIN_PW=pw;loadAll().then(()=>{setOk(true);setErr("")}).catch(x=>{ADMIN_PW="";setErr(x.message)})};
+  const run=p=>p.then(()=>{setErr("");refresh();return true}).catch(x=>{setErr(x.message);return false});
+  const submit=()=>{const price=Number(f.price);
+    if(!f.name.trim()||!(price>0)){setErr("Enter a name and a price above 0.");return}
+    const body={...f,name:f.name.trim(),price,emoji:f.emoji||"📦"};
+    run(edit?api("PUT","/api/products/"+edit,body,true):api("POST","/api/products",body,true)).then(good=>{if(good){setF(blank);setEdit(null)}})};
+  if(!ok)return <div className="panel"><h2>Admin sign-in</h2>
+    <div className="demo">Enter the ADMIN_PASSWORD you set when starting the server. It stays in memory only and is cleared on reload.</div>
+    <Field label="Admin password" type="password" value={pw} onChange={setPw}/>
+    {err&&<div className="err">{err}</div>}<button className="btn" style={{marginTop:12}} onClick={unlock}>Unlock</button></div>;
+  return <>
+    <div className="panel"><h2>{edit?"Edit product":"Add product"}</h2>
+      <Field label="Name" value={f.name} onChange={v=>setF({...f,name:v})}/>
+      <Field label="Price (₦)" type="number" value={f.price} onChange={v=>setF({...f,price:v})}/>
+      <Field label="Emoji icon" value={f.emoji} onChange={v=>setF({...f,emoji:v})}/>
+      <Field label="Category"><select value={f.cat} onChange={ev=>setF({...f,cat:ev.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></Field>
+      {err&&<div className="err">{err}</div>}
+      <div style={{display:"flex",gap:8,marginTop:12}}><button className="btn" onClick={submit}>{edit?"Save changes":"Add product"}</button>{edit&&<button className="btn ol" onClick={()=>{setEdit(null);setF(blank)}}>Cancel</button>}</div></div>
+    <div className="panel"><h2>Products ({products.length})</h2>
+      {products.map(p=><div className="row" key={p.id}><span style={{fontSize:26}}>{p.emoji}</span><div className="t"><div className="pn">{p.name}</div><div className="mut" style={{fontSize:12}}>{p.cat} · {naira(p.price)}</div></div>
+        <button className="btn ol" onClick={()=>{setEdit(p.id);setF({name:p.name,price:String(p.price),cat:p.cat,emoji:p.emoji});window.scrollTo(0,0)}}>Edit</button>
+        <button className="btn ol" onClick={()=>run(api("DELETE","/api/products/"+p.id,null,true))}>Remove</button></div>)}</div>
+    <div className="panel"><h2>Orders ({orders.length})</h2><button className="btn ol" onClick={()=>loadAll().catch(x=>setErr(x.message))}>Refresh</button>
+      {orders.map(o=><div className="row" key={o.id}><div className="t"><b>{o.ref}</b> · {naira(o.subtotal)}<div className="mut" style={{fontSize:13}}>{o.name} · {o.phone}<br/>{o.address}{o.notes&&<><br/>Notes: {o.notes}</>}<br/>{o.items.map(i=>i.qty+"× "+i.name).join(", ")}<br/>{o.created}</div></div></div>)}</div>
+    <div className="panel"><h2>Seller applications ({sellers.length})</h2>
+      {sellers.map(s=><div className="row" key={s.id}><div className="t"><b>{s.biz}</b> · {s.cat}<div className="mut" style={{fontSize:13}}>{s.name} · {s.phone} · {s.email}<br/>{s.created}</div></div></div>)}</div></>;
+}
+function App(){
+  const [view,setView]=useState("home");
+  const [products,setProducts]=useState([]);const [loadErr,setLoadErr]=useState("");
+  const refresh=()=>api("GET","/api/products").then(p=>{setProducts(p);setLoadErr("")}).catch(()=>setLoadErr("Could not reach the server. Is server.py running?"));
+  const [cart,setCart]=useState(()=>load("vendora_cart",{}));
+  const [order,setOrder]=useState(null);
+  useEffect(()=>{refresh()},[]);
+  useEffect(()=>save("vendora_cart",cart),[cart]);
+  const go=v=>{setView(v);window.scrollTo(0,0)};
+  const items=Object.entries(cart).map(([id,qty])=>({p:products.find(p=>String(p.id)===id),qty})).filter(x=>x.p&&x.qty>0);
+  const subtotal=items.reduce((s,{p,qty})=>s+p.price*qty,0);
+  const count=items.reduce((s,x)=>s+x.qty,0);
+  const add=id=>setCart(c=>({...c,[id]:(c[id]||0)+1}));
+  const setQty=(id,q)=>setCart(c=>{const n={...c};if(q<=0)delete n[id];else n[id]=q;return n});
+  const place=async f=>{const d=await api("POST","/api/orders",{...f,items:items.map(({p,qty})=>({id:p.id,qty}))});setOrder({f,items:d.items.map(i=>({p:i,qty:i.qty})),subtotal:d.subtotal,ref:d.ref});setCart({});go("done")};
+  const tab=(v,l)=><button className={"nb"+(view===v?" on":"")} onClick={()=>go(v)}>{l}</button>;
+  return <>
+    <header><div className="bar">
+      <button className="logo" onClick={()=>go("home")}>VEND<b>O</b>RA</button>
+      <nav className="nav">{tab("seller","Sell")}{tab("admin","Admin")}{tab("cart","🛒 Cart")}{count>0&&<span className="badge" style={{alignSelf:"center"}}>{count}</span>}</nav>
+    </div></header>
+    <main>
+      {loadErr&&<div className="demo">{loadErr}</div>}
+      {view==="home"&&<Home products={products} onAdd={add}/>}
+      {view==="cart"&&<Cart items={items} setQty={setQty} go={go} subtotal={subtotal}/>}
+      {view==="checkout"&&<Checkout items={items} subtotal={subtotal} onPlace={place} go={go}/>}
+      {view==="done"&&order&&<Confirmation o={order} go={go}/>}
+      {view==="seller"&&<Seller/>}
+      {view==="admin"&&<Admin products={products} refresh={refresh}/>}
+    </main>
+    <footer>VENDORA demo storefront · Prices in Nigerian naira (₦) · No online payments are processed. Orders and seller applications are saved to this shop’s database.</footer>
+  </>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body></html>

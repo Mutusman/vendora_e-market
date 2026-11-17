@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LYCON Business</title>
+<style>
+:root{--gold:#D4AF37;--black:#000;--graphite:#111;--grey:#f4f3f1;--line:#e6e3db;--white:#fff;--green:#2a9d5c;--red:#c0392b;
+box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:inherit} html,body{height:100%;margin:0}
+body{background:var(--grey); color:var(--black); font-family:'Segoe UI',system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--grey:#0b0b0b;--black:#f4f3f1;--white:#161616;--line:#2a2a2a;}}
+:root[data-theme="dark"]{--grey:#0b0b0b;--black:#f4f3f1;--white:#161616;--line:#2a2a2a;}
+
+.wrap{display:flex; min-height:100vh}
+.side{width:190px; background:var(--black); color:#fff; padding:20px 0; flex-shrink:0}
+.side .mark{font-family:Georgia,serif; padding:0 18px 18px; font-size:15px; letter-spacing:.03em; border-bottom:1px solid #222}
+.side .mark b{color:var(--gold)}
+.side nav{display:flex; flex-direction:column; margin-top:10px}
+.side nav button{background:none; border:none; color:#ccc; text-align:left; padding:11px 18px; font-size:13px; cursor:pointer}
+.side nav button.active{color:var(--gold); background:#161616; border-left:3px solid var(--gold)}
+.main{flex:1; padding:20px 22px; max-width:900px}
+.badge{background:#fff3cd; color:#7a5b00; font-size:11px; padding:6px 10px; border-radius:8px; display:inline-block; margin-bottom:14px}
+h1{font-size:19px; margin:0 0 16px}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px}
+.card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px}
+.card .lbl{font-size:11px; color:#8a8578; text-transform:uppercase; letter-spacing:.06em}
+.card .val{font-size:22px; font-weight:600; margin-top:6px}
+.card .val.gold{color:var(--gold)}
+
+.panel{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px}
+.panel h3{margin:0 0 12px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:#8a8578}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line)}
+th{color:#8a8578; font-weight:500; font-size:11px; text-transform:uppercase}
+.status{font-size:10px; padding:2px 8px; border-radius:20px}
+.status.ok{background:#e6f4ea; color:var(--green)}
+.status.pend{background:#fff3cd; color:#8a6d00}
+.status.fail{background:#fbe4e0; color:var(--red)}
+.actions{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap}
+button.primary{background:var(--black); color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; cursor:pointer}
+button.ghost{background:none; border:1px solid var(--line); border-radius:10px; padding:10px 16px; font-size:13px; cursor:pointer; color:var(--black)}
+.qrbox{width:120px; height:120px; background:var(--grey); border:1px dashed var(--line); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#8a8578; margin:10px 0}
+.section{display:none}
+.section.active{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div class="mark">LYCON <b>Business</b></div>
+    <nav>
+      <button class="active" data-s="dashboard">📊 Dashboard</button>
+      <button data-s="sales">💰 Sales</button>
+      <button data-s="transactions">📜 Transactions</button>
+      <button data-s="customers">👥 Customers</button>
+      <button data-s="qr">▦ QR &amp; Payment Links</button>
+      <button data-s="settlement">🏦 Settlement</button>
+      <button data-s="reports">📈 Reports</button>
+      <button data-s="refunds">↩️ Refunds</button>
+    </nav>
+  </div>
+  <div class="main">
+    <div class="badge">SANDBOX MODE — demo data, no live payments</div>
+
+    <div class="section active" id="dashboard">
+      <h1>Business overview</h1>
+      <div class="cards">
+        <div class="card"><div class="lbl">Business balance</div><div class="val gold">₦0.00</div></div>
+        <div class="card"><div class="lbl">Today's sales</div><div class="val">₦0.00</div></div>
+        <div class="card"><div class="lbl">Transactions today</div><div class="val">0</div></div>
+        <div class="card"><div class="lbl">Pending settlement</div><div class="val">₦0.00</div></div>
+      </div>
+      <div class="panel"><h3>Recent activity</h3><table><tr><td colspan="3" style="color:#8a8578">No recent activity yet.</td></tr></table></div>
+    </div>
+
+    <div class="section" id="sales">
+      <h1>Sales</h1>
+      <div class="panel"><h3>Sales summary</h3>
+        <table><thead><tr><th>Period</th><th>Revenue</th><th>Orders</th></tr></thead>
+        <tbody><tr><td>Today</td><td>₦0.00</td><td>0</td></tr><tr><td>This week</td><td>₦0.00</td><td>0</td></tr><tr><td>This month</td><td>₦0.00</td><td>0</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="section" id="transactions">
+      <h1>Transactions</h1>
+      <div class="panel"><h3>All transactions</h3>
+        <table><thead><tr><th>Ref</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody id="txnBody"><tr><td colspan="4" style="color:#8a8578">No transactions yet.</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="section" id="customers">
+      <h1>Customers</h1>
+      <div class="panel"><h3>Customer list</h3><table><tr><td style="color:#8a8578">No customers recorded yet.</td></tr></table></div>
+    </div>
+
+    <div class="section" id="qr">
+      <h1>QR &amp; payment links</h1>
+      <div class="panel">
+        <h3>Merchant QR code</h3>
+        <div class="qrbox">QR preview</div>
+        <div class="actions"><button class="primary" id="genQr">Generate QR</button><button class="ghost" id="genLink">Create payment link</button><button class="ghost" id="genInvoice">Create invoice</button></div>
+        <div id="genOut" style="font-size:13px; color:#8a8578"></div>
+      </div>
+    </div>
+
+    <div class="section" id="settlement">
+      <h1>Settlement</h1>
+      <div class="panel"><h3>Settlement schedule</h3>
+        <table><tr><th>Next settlement</th><td>—</td></tr><tr><th>Bank account</th><td>Not linked</td></tr><tr><th>Settlement balance</th><td>₦0.00</td></tr></table>
+        <div class="actions" style="margin-top:12px"><button class="ghost">Link bank account</button></div>
+      </div>
+    </div>
+
+    <div class="section" id="reports">
+      <h1>Reports</h1>
+      <div class="panel"><h3>Downloadable reports</h3>
+        <div class="actions"><button class="ghost">Sales report</button><button class="ghost">Transaction report</button><button class="ghost">Settlement report</button></div>
+      </div>
+    </div>
+
+    <div class="section" id="refunds">
+      <h1>Refund management</h1>
+      <div class="panel"><h3>Refund requests</h3><table><tr><td style="color:#8a8578">No refund requests yet.</td></tr></table></div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.side nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.side nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.s).classList.add('active');
+  });
+});
+document.getElementById('genQr').addEventListener('click',()=>{document.getElementById('genOut').textContent='QR code generated (demo) — ref MQR'+Date.now().toString().slice(-6);});
+document.getElementById('genLink').addEventListener('click',()=>{document.getElementById('genOut').textContent='Payment link created (demo): lycon.pay/link/'+Date.now().toString().slice(-6);});
+document.getElementById('genInvoice').addEventListener('click',()=>{document.getElementById('genOut').textContent='Invoice created (demo) — INV'+Date.now().toString().slice(-6);});
+</script>
+</body>
+</html>

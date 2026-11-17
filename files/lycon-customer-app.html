@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LYCON Wallet</title>
+<style>
+:root{
+  --gold:#D4AF37; --black:#000; --graphite:#111; --grey:#f4f3f1; --line:#e6e3db; --white:#fff; --green:#2a9d5c; --red:#c0392b;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--grey); color:var(--black); font-family:'Segoe UI',system-ui,sans-serif; display:flex; justify-content:center}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --grey:#0b0b0b; --black:#f4f3f1; --white:#161616; --line:#2a2a2a; } }
+:root[data-theme="dark"]{ --grey:#0b0b0b; --black:#f4f3f1; --white:#161616; --line:#2a2a2a; }
+
+.app{width:100%; max-width:420px; min-height:100%; display:flex; flex-direction:column; padding-bottom:68px}
+.badge{background:#fff3cd; color:#7a5b00; font-size:10.5px; text-align:center; padding:5px; letter-spacing:.04em}
+.topbar{display:flex; justify-content:space-between; align-items:center; padding:14px 18px 2px}
+.mark{font-family:Georgia,serif; font-size:16px; letter-spacing:.03em}
+.mark b{color:var(--gold)}
+.bell{font-size:16px; opacity:.7}
+
+.balance{margin:12px 16px 0; background:linear-gradient(135deg,#000,#232323); color:#f4f3f1; border-radius:18px; padding:22px 20px; box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.balance .lbl{font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.65}
+.balance .amt{font-size:30px; font-weight:600; margin-top:6px}
+.balance .amt span{color:var(--gold)}
+.balance .row{display:flex; gap:10px; margin-top:16px}
+.balance .row button{flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer}
+.btn-add{background:var(--gold); color:#111}
+.btn-out{background:rgba(255,255,255,.1); color:#f4f3f1}
+
+.quick{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:18px 16px 4px}
+.qbtn{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer}
+.qbtn .ic{width:34px; height:34px; border-radius:50%; background:var(--grey); display:flex; align-items:center; justify-content:center; font-size:16px}
+.qbtn span{font-size:10px; text-align:center}
+
+.panel{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:16px; margin:14px 16px 0}
+.panel h3{margin:0 0 10px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#8a8578}
+.field{margin-bottom:8px}
+.inputrow{display:flex; gap:8px}
+input,select{flex:1; padding:11px 12px; border:1px solid var(--line); border-radius:10px; background:var(--grey); color:var(--black); font-size:14px}
+button.primary{background:var(--black); color:#fff; border:none; border-radius:10px; padding:11px 16px; font-size:13px; cursor:pointer}
+button.primary:disabled{opacity:.4}
+.err{color:var(--red); font-size:12px; margin-top:6px; min-height:14px}
+.hidden{display:none}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px}
+.chip{padding:6px 12px; border:1px solid var(--line); border-radius:20px; font-size:12px; cursor:pointer}
+.chip.sel{background:var(--gold); border-color:var(--gold); color:#111; font-weight:600}
+
+.txn{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px}
+.txn:last-child{border-bottom:none}
+.txn .left{display:flex; gap:10px; align-items:center}
+.txn .ic{width:30px; height:30px; border-radius:50%; background:var(--grey); display:flex; align-items:center; justify-content:center; font-size:13px}
+.txn .meta{color:#8a8578; font-size:11px}
+.status{font-size:10px; padding:2px 7px; border-radius:20px; margin-left:6px}
+.status.ok{background:#e6f4ea; color:var(--green)}
+.status.pend{background:#fff3cd; color:#8a6d00}
+.amt.in{color:var(--green)} .amt.out{color:var(--red)}
+.empty{color:#8a8578; font-size:13px; text-align:center; padding:14px 0}
+
+.nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px; background:var(--white); border-top:1px solid var(--line); display:flex; padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+.nav button{flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px; color:#8a8578; font-size:10px; cursor:pointer}
+.nav button.active{color:var(--gold)}
+.sheet{margin:14px 16px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="badge">SANDBOX MODE — no real money moves in this prototype</div>
+  <div class="topbar">
+    <div class="mark">LYCON <b>Wallet</b></div>
+    <div class="bell">🔔</div>
+  </div>
+
+  <div id="homeView">
+    <div class="balance">
+      <div class="lbl">Available balance</div>
+      <div class="amt">₦<span id="balanceVal">0.00</span></div>
+      <div class="row">
+        <button class="btn-add" id="gotoAdd">+ Add Money</button>
+        <button class="btn-out" id="gotoSend">Send</button>
+      </div>
+    </div>
+    <div class="quick">
+      <div class="qbtn" data-p="addPanel"><div class="ic">➕</div><span>Add Money</span></div>
+      <div class="qbtn" data-p="sendPanel"><div class="ic">↗️</div><span>Send</span></div>
+      <div class="qbtn" data-p="airtimePanel"><div class="ic">📱</div><span>Airtime</span></div>
+      <div class="qbtn" data-p="billsPanel"><div class="ic">🧾</div><span>Bills</span></div>
+      <div class="qbtn" data-p="qrPanel"><div class="ic">▦</div><span>QR Pay</span></div>
+      <div class="qbtn" data-p="bankPanel"><div class="ic">🏦</div><span>Withdraw</span></div>
+      <div class="qbtn" data-p="beneficiaryPanel"><div class="ic">👥</div><span>Beneficiaries</span></div>
+      <div class="qbtn" data-p="historyPanel"><div class="ic">📜</div><span>History</span></div>
+    </div>
+  </div>
+
+  <div class="panel sheet hidden" id="addPanel">
+    <h3>Add money</h3>
+    <div class="chips" id="addMethodChips">
+      <div class="chip sel" data-v="Bank Transfer">Bank Transfer</div>
+      <div class="chip" data-v="Debit Card">Debit Card</div>
+      <div class="chip" data-v="USSD">USSD</div>
+    </div>
+    <div class="field inputrow"><input type="number" id="addInput" placeholder="Amount (₦)"><button class="primary" id="addBtn">Add</button></div>
+    <div class="err" id="addErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="sendPanel">
+    <h3>Send money</h3>
+    <div class="chips" id="sendMethodChips">
+      <div class="chip sel" data-v="username">LYCON Username</div>
+      <div class="chip" data-v="phone">Phone Number</div>
+      <div class="chip" data-v="account">Bank Account</div>
+    </div>
+    <div class="field"><input type="text" id="sendTo" placeholder="Recipient"></div>
+    <div class="field inputrow"><input type="number" id="sendInput" placeholder="Amount (₦)"><button class="primary" id="sendBtn">Send</button></div>
+    <div class="err" id="sendErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="airtimePanel">
+    <h3>Buy airtime</h3>
+    <div class="chips" id="networkChips">
+      <div class="chip sel" data-v="MTN">MTN</div><div class="chip" data-v="Airtel">Airtel</div>
+      <div class="chip" data-v="Glo">Glo</div><div class="chip" data-v="9mobile">9mobile</div>
+    </div>
+    <div class="field"><input type="text" id="airtimePhone" placeholder="Phone number"></div>
+    <div class="field inputrow"><input type="number" id="airtimeInput" placeholder="Amount (₦)"><button class="primary" id="airtimeBtn">Buy</button></div>
+    <div class="err" id="airtimeErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="billsPanel">
+    <h3>Pay a bill</h3>
+    <div class="chips" id="billChips">
+      <div class="chip sel" data-v="Electricity">Electricity</div><div class="chip" data-v="Cable TV">Cable TV</div>
+      <div class="chip" data-v="Internet">Internet</div><div class="chip" data-v="Education">Education</div>
+    </div>
+    <div class="field"><input type="text" id="billRef" placeholder="Meter / smartcard / customer ID"></div>
+    <div class="field inputrow"><input type="number" id="billInput" placeholder="Amount (₦)"><button class="primary" id="billBtn">Pay</button></div>
+    <div class="err" id="billErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="qrPanel">
+    <h3>QR Pay</h3>
+    <div class="chips"><div class="chip sel">Scan</div><div class="chip">My QR Code</div></div>
+    <div class="empty">Camera / QR preview would render here.<br>Placeholder — connects to the QR payment service.</div>
+  </div>
+
+  <div class="panel sheet hidden" id="bankPanel">
+    <h3>Withdraw to bank</h3>
+    <div class="field"><input type="text" id="wBank" placeholder="Bank name"></div>
+    <div class="field"><input type="text" id="wAcct" placeholder="Account number"></div>
+    <div class="field inputrow"><input type="number" id="wInput" placeholder="Amount (₦)"><button class="primary" id="wBtn">Withdraw</button></div>
+    <div class="err" id="wErr"></div>
+  </div>
+
+  <div class="panel sheet hidden" id="beneficiaryPanel">
+    <h3>Beneficiaries</h3>
+    <div class="empty">No saved beneficiaries yet. Recipients you send to are saved here automatically.</div>
+  </div>
+
+  <div class="panel" id="historyPanel">
+    <h3>Transaction history</h3>
+    <div id="txnList"><div class="empty">No transactions yet</div></div>
+  </div>
+
+  <div class="nav">
+    <button class="active" data-p="">🏠<span>Home</span></button>
+    <button data-p="addPanel">➕<span>Add</span></button>
+    <button data-p="qrPanel">▦<span>QR</span></button>
+    <button data-p="historyPanel">📜<span>History</span></button>
+    <button data-p="profilePanel">👤<span>Profile</span></button>
+  </div>
+
+  <div class="panel sheet hidden" id="profilePanel">
+    <h3>Profile</h3>
+    <div class="field"><input type="text" value="Demo Customer" disabled></div>
+    <div class="field"><input type="text" value="KYC status: Pending" disabled></div>
+    <div class="empty">Security, PIN, biometric login &amp; device management would live here.</div>
+  </div>
+</div>
+
+<script>
+const STORE_KEY='lycon_customer_v1';
+let state={balance:0, txns:[]};
+function load(){try{const r=localStorage.getItem(STORE_KEY); if(r) state=JSON.parse(r);}catch(e){}}
+function save(){try{localStorage.setItem(STORE_KEY, JSON.stringify(state));}catch(e){}}
+function fmt(n){return n.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function ref(){return 'LYC'+Date.now().toString().slice(-8);}
+
+function render(){
+  document.getElementById('balanceVal').textContent=fmt(state.balance);
+  const list=document.getElementById('txnList');
+  if(!state.txns.length){list.innerHTML='<div class="empty">No transactions yet</div>';return;}
+  const icons={add:'➕',send:'↗️',airtime:'📱',bill:'🧾',withdraw:'🏦'};
+  list.innerHTML=state.txns.slice().reverse().map(t=>{
+    const isIn=t.type==='add';
+    return `<div class="txn"><div class="left"><div class="ic">${icons[t.type]||'💠'}</div>
+      <div><div>${t.desc}<span class="status ${t.status==='Successful'?'ok':'pend'}">${t.status}</span></div>
+      <div class="meta">${t.ref} · ${t.date}</div></div></div>
+      <div class="amt ${isIn?'in':'out'}">${isIn?'+':'-'}₦${fmt(t.amount)}</div></div>`;
+  }).join('');
+}
+function addTxn(type,amount,desc){
+  state.txns.push({type,amount,desc,ref:ref(),status:'Successful',date:new Date().toLocaleString()});
+}
+function showPanel(id){
+  document.querySelectorAll('.sheet,#historyPanel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('historyPanel').classList.remove('hidden');
+  if(id) document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.p===(id||'')));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.qbtn').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.p)));
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.p)));
+document.getElementById('gotoAdd').addEventListener('click',()=>showPanel('addPanel'));
+document.getElementById('gotoSend').addEventListener('click',()=>showPanel('sendPanel'));
+document.querySelectorAll('.chips').forEach(group=>{
+  group.addEventListener('click',e=>{
+    if(!e.target.classList.contains('chip'))return;
+    [...group.children].forEach(c=>c.classList.remove('sel'));
+    e.target.classList.add('sel');
+  });
+});
+
+function doAdd(){
+  const err=document.getElementById('addErr'); err.textContent='';
+  const v=parseFloat(document.getElementById('addInput').value);
+  const method=document.querySelector('#addMethodChips .sel').dataset.v;
+  if(!v||v<=0){err.textContent='Enter a valid amount.';return;}
+  state.balance+=v; addTxn('add',v,'Add money via '+method); save(); render();
+  document.getElementById('addInput').value='';
+}
+function doSend(){
+  const err=document.getElementById('sendErr'); err.textContent='';
+  const to=document.getElementById('sendTo').value.trim();
+  const v=parseFloat(document.getElementById('sendInput').value);
+  if(!to){err.textContent='Enter a recipient.';return;}
+  if(!v||v<=0){err.textContent='Enter a valid amount.';return;}
+  if(v>state.balance){err.textContent='Insufficient balance.';return;}
+  state.balance-=v; addTxn('send',v,'Sent to '+to); save(); render();
+  document.getElementById('sendTo').value=''; document.getElementById('sendInput').value='';
+}
+function doAirtime(){
+  const err=document.getElementById('airtimeErr'); err.textContent='';
+  const net=document.querySelector('#networkChips .sel').dataset.v;
+  const phone=document.getElementById('airtimePhone').value.trim();
+  const v=parseFloat(document.getElementById('airtimeInput').value);
+  if(!phone){err.textContent='Enter a phone number.';return;}
+  if(!v||v<=0){err.textContent='Enter a valid amount.';return;}
+  if(v>state.balance){err.textContent='Insufficient balance.';return;}
+  state.balance-=v; addTxn('airtime',v,net+' airtime · '+phone); save(); render();
+  document.getElementById('airtimePhone').value=''; document.getElementById('airtimeInput').value='';
+}
+function doBill(){
+  const err=document.getElementById('billErr'); err.textContent='';
+  const cat=document.querySelector('#billChips .sel').dataset.v;
+  const rf=document.getElementById('billRef').value.trim();
+  const v=parseFloat(document.getElementById('billInput').value);
+  if(!rf){err.textContent='Enter the reference ID.';return;}
+  if(!v||v<=0){err.textContent='Enter a valid amount.';return;}
+  if(v>state.balance){err.textContent='Insufficient balance.';return;}
+  state.balance-=v; addTxn('bill',v,cat+' bill · '+rf); save(); render();
+  document.getElementById('billRef').value=''; document.getElementById('billInput').value='';
+}
+function doWithdraw(){
+  const err=document.getElementById('wErr'); err.textContent='';
+  const bank=document.getElementById('wBank').value.trim();
+  const acct=document.getElementById('wAcct').value.trim();
+  const v=parseFloat(document.getElementById('wInput').value);
+  if(!bank||!acct){err.textContent='Enter bank and account number.';return;}
+  if(!v||v<=0){err.textContent='Enter a valid amount.';return;}
+  if(v>state.balance){err.textContent='Insufficient balance.';return;}
+  state.balance-=v; addTxn('withdraw',v,'Withdraw to '+bank+' ('+acct+')'); save(); render();
+  document.getElementById('wBank').value=''; document.getElementById('wAcct').value=''; document.getElementById('wInput').value='';
+}
+document.getElementById('addBtn').addEventListener('click',doAdd);
+document.getElementById('sendBtn').addEventListener('click',doSend);
+document.getElementById('airtimeBtn').addEventListener('click',doAirtime);
+document.getElementById('billBtn').addEventListener('click',doBill);
+document.getElementById('wBtn').addEventListener('click',doWithdraw);
+
+load(); render(); showPanel('');
+</script>
+</body>
+</html>
